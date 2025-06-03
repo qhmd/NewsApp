@@ -1,29 +1,38 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
+import { useAppThemes } from "@/hooks/useAppThemes";
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
+import { useEffect } from 'react';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+import { initializeThemeListener } from '@/stores/themeStores';
+import { StatusBar } from 'react-native';
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
-
-  if (!loaded) {
-    // Async font loading only occurs in development.
-    return null;
-  }
-
+function RootNav() {
+  const {themeName} = useAppThemes()
+  console.log(themeName)
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <>
+      <StatusBar barStyle={themeName === 'light' ? 'dark-content' : 'light-content'} />
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    </>
+
   );
+}
+
+export default function RootLayout() {
+  useEffect(() => {
+    // Inisialisasi listener untuk perubahan tema sistem
+    const unsubscribe = initializeThemeListener();
+    // Cleanup listener saat komponen RootLayout unmount (meskipun jarang terjadi untuk root)
+    return () => unsubscribe();
+  }, []);
+  return (
+    <GestureHandlerRootView>
+      <SafeAreaProvider>
+        <RootNav/>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  )
 }
