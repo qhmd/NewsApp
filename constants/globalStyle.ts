@@ -29,25 +29,31 @@ export const globalStyle = (theme: ColorThemeInterface) => {
 
             scrollViewKategory: {
                 marginTop: 5,
-                marginHorizontal : 2,
+                marginHorizontal: 2,
             },
-            scrollViewItem : {
+            scrollViewItem: {
                 color: theme.placeHolder,
                 paddingVertical: 8,
                 fontSize: 14,
                 paddingHorizontal: 15,
             },
-            indicatorView : {
+            indicatorView: {
                 height: 2,
                 backgroundColor: theme.primary
             },
-            indicatorActiity : {
-                color : 'eb1a2f'
+            indicatorActiity: {
+                color: 'eb1a2f'
             },
             card: {
                 backgroundColor: theme.card,
-                paddingVertical: 10, 
+                paddingVertical: 10,
                 paddingHorizontal: 10
+            },
+            modalContent: {
+                paddingVertical : 10,
+                paddingLeft : 5,
+                justifyContent: 'center',
+                backgroundColor: theme.background
             }
         })
     )

@@ -10,13 +10,14 @@ export interface NewsItemProps {
   urlImage: string;
   author: string;
   datePublish: any;
+  onPress? : () => void
 }
 
-const NewsItem = ({ title, urlImage, author, datePublish }: NewsItemProps) => {
+const NewsItem = ({ title, urlImage, author, datePublish, onPress }: NewsItemProps) => {
   const { theme } = useAppThemes();
   const styles = globalStyle(theme);
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <ImageNews urlImage={urlImage} />
       <View >
         <Title styles={styles.featuredText}>{title}</Title>

@@ -8,6 +8,7 @@ export interface Article {
   multimedia: {
     url: string;
   }[];
+  url: string
 }
 
 export interface FetchArticlesResponse {
