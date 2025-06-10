@@ -3,14 +3,17 @@ import { useEffect } from "react";
 import useNewsStore from './store';
 
 const AllNews = () => {
-    const {news, loading, error, fetchNews } = useNewsStore()
+    const {news, loading, fetchNews, refreshRandom } = useNewsStore()
     
     useEffect(() => {
         fetchNews()
     }, [fetchNews])
     return(
             <NewsFeed
-                newsData={news} 
+                newsData={news}
+                fetchMore={fetchNews}
+                loading={loading}
+                refresh={refreshRandom}
             />    
     )
 }

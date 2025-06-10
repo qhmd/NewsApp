@@ -41,6 +41,9 @@ export const globalStyle = (theme: ColorThemeInterface) => {
                 height: 2,
                 backgroundColor: theme.primary
             },
+            indicatorActiity : {
+                color : 'eb1a2f'
+            },
             card: {
                 backgroundColor: theme.card,
                 paddingVertical: 10, 
