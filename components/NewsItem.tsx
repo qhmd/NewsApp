@@ -16,9 +16,9 @@ const NewsItem = ({ title, urlImage, author, datePublish }: NewsItemProps) => {
   const { theme } = useAppThemes();
   const styles = globalStyle(theme);
   return (
-    <TouchableOpacity>
+    <TouchableOpacity style={styles.card}>
       <ImageNews urlImage={urlImage} />
-      <View style={styles.container}>
+      <View >
         <Title styles={styles.featuredText}>{title}</Title>
         <SmallTextNews styles={styles.featuredText} author={author} timeUpload={datePublish} />
       </View>

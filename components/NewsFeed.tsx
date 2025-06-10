@@ -32,9 +32,8 @@ const NewsFeed = ({ newsData }: NewsFeedProps) => {
                 data={newsData}
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={renderItem}
-                style={styles.card}
+                style={styles.container}
             />
-
         </View>
     )
 }

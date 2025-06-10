@@ -1,4 +1,6 @@
+import { formatDate } from "@/constants/formatDate"
 import { StyleSheet, Text, View } from "react-native"
+
 interface SmallTextNewsProps {
     author: string,
     timeUpload: any,
@@ -6,10 +8,11 @@ interface SmallTextNewsProps {
 }
 
 const SmallTextNews = ({ author, timeUpload, styles }: SmallTextNewsProps) => {
+    const formatDatePublish = formatDate(timeUpload)
     return (
         <View>
             <Text style={[styles, stylesLocal.text]}>
-                {author} - {timeUpload}
+                {author} - {formatDatePublish}
             </Text>
         </View>
         )

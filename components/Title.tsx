@@ -8,7 +8,7 @@ interface TitleProps{
 
 const Title = ({children, styles} : TitleProps )=> {
     return (
-        <Text style={[styles, stylesLocal]}>
+        <Text style={[styles, stylesLocal.title]}>
             {children}
         </Text>
     )
@@ -16,8 +16,10 @@ const Title = ({children, styles} : TitleProps )=> {
 
 const stylesLocal = StyleSheet.create({
         title : {
+        fontWeight: 'bold',
         fontFamily: 'HelveticaNeue-CondensedBold',
-        fontSize : 20,
+        fontSize : 17,
+        marginTop: 5
     }
 })
 

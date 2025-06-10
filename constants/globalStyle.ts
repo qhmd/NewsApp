@@ -6,7 +6,6 @@ export const globalStyle = (theme: ColorThemeInterface) => {
         StyleSheet.create({
             container: {
                 backgroundColor: theme.background,
-                paddingHorizontal: 3,
                 flex: 1,
             },
             textInput: {
@@ -43,7 +42,9 @@ export const globalStyle = (theme: ColorThemeInterface) => {
                 backgroundColor: theme.primary
             },
             card: {
-                backgroundColor: theme.card
+                backgroundColor: theme.card,
+                paddingVertical: 10, 
+                paddingHorizontal: 10
             }
         })
     )
