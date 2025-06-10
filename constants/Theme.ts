@@ -11,7 +11,7 @@ export interface ColorThemeInterface {
 
 export const LightTheme: ColorThemeInterface = {
   name: 'light',
-  background: '#ededed',
+  background: '#fff',
   text: 'black',
   primary: '#eb1a2f', // tambah # supaya konsisten
   card: 'white',

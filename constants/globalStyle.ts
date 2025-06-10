@@ -6,6 +6,7 @@ export const globalStyle = (theme: ColorThemeInterface) => {
         StyleSheet.create({
             container: {
                 backgroundColor: theme.background,
+                paddingHorizontal: 3,
                 flex: 1,
             },
             textInput: {
@@ -22,6 +23,28 @@ export const globalStyle = (theme: ColorThemeInterface) => {
                 color: theme.text,
             },
 
+            categoryOnSelect: {
+                color: theme.text,
+                fontWeight: 'bold'
+            },
+
+            scrollViewKategory: {
+                marginTop: 5,
+                marginHorizontal : 2,
+            },
+            scrollViewItem : {
+                color: theme.placeHolder,
+                paddingVertical: 8,
+                fontSize: 14,
+                paddingHorizontal: 15,
+            },
+            indicatorView : {
+                height: 2,
+                backgroundColor: theme.primary
+            },
+            card: {
+                backgroundColor: theme.card
+            }
         })
     )
 }
