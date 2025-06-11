@@ -72,7 +72,7 @@ const NewsFeed = ({ newsData, fetchMore, refresh, loading }: NewsFeedProps) => {
                 onRequestClose={onModalClose}
             >
                 <View style={styles.modalContent}>
-                    <Ionicons name="chevron-back" size={28} onPress={onModalClose} color={styles.featuredText.color} />
+                    <Ionicons name="chevron-back" size={28} style={stylesLocal.backIcons} onPress={onModalClose} color={styles.featuredText.color} />
                 </View>
                 {modalUrl && (
                     <WebView
@@ -122,6 +122,9 @@ const stylesLocal = StyleSheet.create({
         height: 2,
         marginVertical: 10,
         backgroundColor: 'gray'
+    },
+    backIcons : {
+        width : 30
     }
 })
 export default NewsFeed
