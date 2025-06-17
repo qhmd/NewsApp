@@ -1,105 +1,122 @@
-// file: LoginScreen.tsx (Gunakan Kode Ini!)
+import { Button, StyleSheet, Text, View, Alert, ActivityIndicator } from 'react-native';
+import React from 'react';
+import 'expo-dev-client';
+import { GoogleSignin, User } from '@react-native-google-signin/google-signin';
+import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { useEffect, useState } from 'react';
 
-import * as Facebook from 'expo-auth-session/providers/facebook';
-import * as Google from 'expo-auth-session/providers/google';
-import * as WebBrowser from 'expo-web-browser';
-import {
-    FacebookAuthProvider,
-    GoogleAuthProvider,
-    signInWithCredential,
-} from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
-import React, { useEffect } from 'react';
-import { Alert, Button, StyleSheet, View } from 'react-native';
-import { auth, db } from '../firebaseConfig';
+import { Platform } from 'react-native';
+import { AccessToken, AuthenticationToken, LoginManager, Profile } from 'react-native-fbsdk-next';
+import FBAccessToken from 'react-native-fbsdk-next/lib/typescript/src/FBAccessToken';
+import FBAuthenticationToken from 'react-native-fbsdk-next/lib/typescript/src/FBAuthenticationToken';
+import { sha256 } from 'react-native-sha256';
+import uuid from 'react-native-uuid';
 
-WebBrowser.maybeCompleteAuthSession();
+// Konfigurasi Google Sign-In di luar komponen agar tidak dijalankan berulang kali
+// Cukup panggil ini sekali saat aplikasi Anda dimulai.
+GoogleSignin.configure({
+  webClientId: '620185224815-mj0uu4r4m88sgmj734s5dq6ot9bpsmfp.apps.googleusercontent.com',
+});
 
-// --- PASTIKAN BAGIAN INI 100% BENAR ---
-// Ganti dengan Client ID tipe "Aplikasi web" Anda
-const WEB_CLIENT_ID = '726812145169-m6c5b5st54ei9emb7h2q7bt45uaa5b99.apps.googleusercontent.com'; 
+LoginManager.setLoginBehavior('web_only')
 
-// Ini sudah diisi dari screenshot Anda. JANGAN DIUBAH.
-const ANDROID_CLIENT_ID = '726812145169-lm5m9neu73cnh5p48vai5nhveb7nod54.apps.googleusercontent.com'; 
+const LoginScreen: React.FC = () => {
+  // State untuk menyimpan informasi pengguna yang login
+  const [user, setUser] = useState<FirebaseAuthTypes.User | null>(null);
+  // State untuk menampilkan loading indicator saat proses login
+  const [loading, setLoading] = useState<boolean>(false);
 
-// Ganti dengan Client ID tipe "iOS" Anda
-const IOS_CLIENT_ID = '726812145169-qeg4qpu6jrqhv5bb8nt5muv2heljo4td.apps.googleusercontent.com';
-
-// Ganti dengan Facebook App ID Anda
-const FACEBOOK_APP_ID = 'GANTI_DENGAN_FACEBOOK_APP_ID_ANDA';
-
-// --- SISA KODE TIDAK PERLU DIUBAH ---
-
-interface LoginScreenProps {
-  onLoginSuccess: () => void;
-}
-
-export default function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
-  
-  const [googleRequest, googleResponse, googlePromptAsync] = Google.useIdTokenAuthRequest({
-    clientId: WEB_CLIENT_ID,
-    iosClientId: IOS_CLIENT_ID,
-    androidClientId: ANDROID_CLIENT_ID,
-  });
-
-  const [facebookRequest, facebookResponse, facebookPromptAsync] = Facebook.useAuthRequest({
-    clientId: FACEBOOK_APP_ID,
-  });
-
-  useEffect(() => {
-    if (googleResponse?.type === 'success') {
-      const { id_token } = googleResponse.params;
-      const credential = GoogleAuthProvider.credential(id_token);
-      signInWithFirebase(credential);
-    } else if (googleResponse?.type === 'error') {
-      Alert.alert('Login Google Gagal', googleResponse.params.error_description || 'Terjadi kesalahan.');
-    }
-  }, [googleResponse]);
-
-  useEffect(() => {
-    if (facebookResponse?.type === 'success') {
-      const { access_token } = facebookResponse.params;
-      const credential = FacebookAuthProvider.credential(access_token);
-      signInWithFirebase(credential);
-    } else if (facebookResponse?.type === 'error') {
-        Alert.alert('Login Facebook Gagal', 'Terjadi kesalahan.');
-    }
-  }, [facebookResponse]);
-
-  const signInWithFirebase = async (credential: any) => {
+  // Fungsi untuk menangani proses login dengan Google
+  const onGoogleButtonPress = async (): Promise<void> => {
+    setLoading(true);
     try {
-      const userCredential = await signInWithCredential(auth, credential);
-      const { user } = userCredential;
-      const userRef = doc(db, 'users', user.uid);
-      await setDoc(userRef, {
-        uid: user.uid,
-        email: user.email,
-        displayName: user.displayName,
-        photoURL: user.photoURL,
-        lastLogin: new Date(),
-      }, { merge: true });
-      onLoginSuccess();
+      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+
+      // signIn() mengembalikan objek respons
+      const signInResponse = await GoogleSignin.signIn();
+
+      // PERBAIKAN: Ambil idToken dari signInResponse.data
+      // Kita gunakan optional chaining (?.) untuk keamanan jika 'data' tidak ada
+      const idToken = signInResponse.data?.idToken;
+
+      if (!idToken) {
+        throw new Error('Login gagal: idToken tidak ditemukan dalam respons.');
+      }
+
+      // Membuat kredensial Google dengan idToken
+      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+
+      // Login ke Firebase dengan kredensial Google
+      const userCredential = await auth().signInWithCredential(googleCredential);
+
+      // Simpan informasi pengguna dari hasil Firebase ke state
+      setUser(userCredential.user);
+
+      Alert.alert('Sukses', `Berhasil login sebagai ${userCredential.user.displayName}`);
+
     } catch (error: any) {
-      Alert.alert('Login Firebase Gagal', error.message);
+      if (error.code === '12501' || error.code === 'SIGN_IN_CANCELLED') {
+        Alert.alert('Batal', 'Anda membatalkan proses login dengan Google.');
+      } else {
+        console.error("Google Sign-In Error:", error);
+        Alert.alert('Error', 'Terjadi kesalahan saat login: ' + error.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Fungsi untuk logout
+  const onSignOut = async (): Promise<void> => {
+    try {
+      await GoogleSignin.signOut();
+      await auth().signOut();
+      setUser(null);
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'Gagal untuk logout.');
+    }
+  };
+
+
+  // Tampilan UI
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <ActivityIndicator size="large" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      <Button
-        title="Masuk dengan Google"
-        disabled={!googleRequest}
-        onPress={() => googlePromptAsync()}
-      />
-      <View style={{ marginVertical: 10 }} />
-      <Button
-        title="Masuk dengan Facebook"
-        disabled={!facebookRequest}
-        onPress={() => facebookPromptAsync()}
-      />
+      {user ? (
+        // Tampilan jika sudah login
+        <View style={styles.userInfo}>
+          <Text style={styles.welcomeText}>Selamat Datang!</Text>
+          <Text>Nama: {user.displayName}</Text>
+          <Text>Email: {user.email}</Text>
+          <View style={styles.buttonContainer}>
+            <Button title="Sign Out" onPress={onSignOut} color="red" />
+          </View>
+        </View>
+      ) : (
+        // Tampilan jika belum login
+        <View>
+          <Text style={styles.infoText}>Silakan login untuk melanjutkan</Text>
+          <Button
+            title="Login dengan Google"
+            onPress={onGoogleButtonPress}
+            disabled={loading}
+          />
+        </View>
+      )}
     </View>
   );
-}
+};
+
+export default LoginScreen;
 
 const styles = StyleSheet.create({
   container: {
@@ -108,4 +125,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
   },
+  userInfo: {
+    alignItems: 'center',
+  },
+  welcomeText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 20,
+  },
+  buttonContainer: {
+    marginTop: 20,
+  }
 });
